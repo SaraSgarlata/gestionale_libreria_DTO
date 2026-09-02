@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns:th=" http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
+	crossorigin="anonymous">
+
+
+<!-- grandezza del modal -->
+<style>  
+.modal {
+	
+	background-color: rgba(0, 0, 0, 0.5);
+	}
+.modal-content {
+	max-width: 400px;
+	width: 90%;
+}
+</style>
+
+</head>
+<body>
+
+	<h1>Lista Libri</h1>
+
+
+	<!-- dropdown per il sort -->
+	<div style="display: flex; align-items: center; gap: 10px;">
+		<!-- sono in un unico div e flex cioè accanto -->
+		<form action="#">
+			<label for="dropDownSort">Order By</label> <select name="ordinamento"
+				id="dropDownSort">
+				<option value="ASC">ASC</option>
+				<option value="DESC">DESC</option>
+			</select>
+		</form>
+
+		<!-- Bottone a destra per inserimento new libro -->
+		<!-- Trigger/Open The Modal -->
+		<button id="myBtn">inserisci nuovo libro</button>
+	</div>
+
+
+	<!-- The Modal -->
+	<div id="myModal" class="modal">
+
+		<!-- Modal content -->
+		<div class="modal-content">
+			<span class="close">&times;</span><!-- è la "X" -->
+			
+			<h2>Inserisci qui il tuo libro</h2>
+			<form id="inserimentoLibroForm">
+				<label for="titolo">Titolo:</label> <br> <input type="text" id="titolo"
+					name="titolo" required><br> <br> 
+					
+					<label for="anno">Anno Pubblic:</label> <br> <input type="number"
+					id="anno" name="anno" required><br> <br> 
+					
+					<label	for="nome">Edizione:</label> <br> <input type="number"
+					id="edizione" name="edizione" required><br> <br>
+
+				<label for="nome">Lingua:</label> <br> <input type="text"
+					id="lingua" name="lingua" required><br> <br>
+					
+					 <label	for="nome">Casa Editrice:</label> <br> <input type="number"
+					id="casaEditrice" name="casaEditrice" required><br> <br>
+
+				<label for="nome">Nome Autore:</label> <br> <input type="text"
+					id="nome" name="nome" required><br> <br> 
+					
+					<label for="nome">Cognome Autore:</label> <br> <input type="text"
+					id="cognome" name="cognome" required><br> <br>
+
+					<button type="submit" id="submit">Invia</button>
+
+					
+			</form>
+		</div>
+	</div>
+
+
+
+	<!-- bootstrap per colori tabella-->
+	<br>
+	<table class="table table-dark">
+		<thead>
+
+			<tr>
+				<th scope="col">Titolo</th>
+				<th scope="col">Anno Pubblicazione</th>
+				<th scope="col">Nome autore</th>
+			</tr>
+
+			<!-- SEZIONI TITOLI -->
+		</thead>
+		<tbody id="corpoTabellaLibri">
+	</table>
+	<!-- ITERAZIONE LISTA LIBRI 
+			<tr th:each="libro : ${bookPage.content}">
+				<td th:text="${libro.titolo}"></td>
+				<td th:text="${libro.annoPubblicazione}"></td>
+				<td th:text="${libro.nomiAutoriString()}"></td>
+			</tr>-->
+	</tbody>
+
+
+	<!-- PAGINAZIONE CON NUMERI CON THYMELEAF
+	<div th:if="${bookPage.totalPages > 1}"
+		class="d-flex justify-content-center">
+		Se bookPage.totalPages è mag di 1, mostra questa sezione di HTML, cioè la paginazione.
+
+		<ul class="pagination">
+			 applico uno stile comune a tutte le pagine numerate
+
+			<li th:each="pageNumber : ${pageNumbers}"
+				th:class="${pageNumber == bookPage.number + 1} ? 'page-item active' : 'page-item'">
+				 itero ${pageNumbers}
+				 <a
+				th:href="@{/listalibri(page=${pageNumber}, pageSize=${bookPage.size}, field=${sortField})}"
+				class="page-link" th:text="${pageNumber}"></a>  la parte "@{/listalibri(page=${pageNumber}, size=${bookPage.size})}
+				"Genera il link per ogni numero di pagina. 
+			</li>
+		</ul>
+	</div> -->
+
+
+	<!-- INIZIO SCRIPT JAVA SCRIPT -->
+
+	<script>
+window.onload = function() {
+    pippo(); 
+};
+
+var current_page = 0;
+var pageSize = 10;
+var sortField = "titoloLibro";
+var sortDirection = "ASC"; 
+
+
+
+function numeroPagine(){
+	var totalPages = 0;
+	 fetch('/pippo', {
+	        method: 'POST'
+	    })
+	    .then(response => {
+	        if (response.ok) {
+	            console.log("function pippo (numero pagine) ok");
+	            return response.json();
+	        } else {
+	            console.log("pippo not ok");
+	            throw new Error(response.status);
+	        }
+	    })
+	    .then(data => {
+	        console.log("Risposta Back End:", data);
+			totalPages=data.numeroPagine;
+			
+			console.log("pagine tot" + totalPages);
+			for(let i=0; i<totalPages; i++){
+				//per visualizzare il numero di pagine in maniera dinamica;
+				$('<option value="'+(i+1) +'">pagina: '+(i+1) + '</option>').appendTo('#dropDownPage');
+
+				}
+			
+})
+
+}
+
+function prevPage()
+{
+    if (current_page > 0) {
+        current_page--;
+        changePage(current_page);
+    }
+}
+
+function nextPage()
+{
+    if (current_page < totalPages - 1) {
+        current_page++;
+        changePage(current_page);
+    }
+    
+    console.log(totalPages);
+}
+
+function changePage(page) {
+	current_page = page;
+    fetch('/richiestajavascript', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `page=${page}&pageSize=${pageSize}&field=${sortField}&sortDirection=${sortDirection}`
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log("function change ok");
+            return response.json();
+        } else {
+            console.log("not ok");
+            throw new Error(response.status);
+        }
+    })
+    .then(data => {
+        console.log("Risposta Back End:", data);
+        
+        current_page = data.currentPage; // pagina corrente
+        totalPages = data.pageNumbers.length; // numero totale pagine
+
+        // pulisco tabella prima di inserire i nuovi dati!!
+        const tableBody = document.getElementById("corpoTabellaLibri");
+        tableBody.innerHTML = "";
+
+        const libriDaMostrare = data.bookPage.content;
+        libriDaMostrare.forEach(libro => {
+            const row = document.createElement("tr");
+
+            const titoloCella = document.createElement("td");
+            titoloCella.textContent = libro.titolo;
+
+            const annoCella = document.createElement("td");
+            annoCella.textContent = libro.annoPubblicazione;
+
+            const autoreCella = document.createElement("td");
+            autoreCella.textContent = libro.nomiAutori;
+
+            row.appendChild(titoloCella);
+            row.appendChild(annoCella);
+            row.appendChild(autoreCella);
+
+            tableBody.appendChild(row);
+        });
+
+    })
+    .catch(error => {
+        console.error("Errore nella richiesta:", error);
+    });
+}
+// bottoni per cambio pagina
+window.onload = function() {
+    document.getElementById("previusButton").addEventListener("click", prevPage);
+    document.getElementById("nextButton").addEventListener("click", nextPage);
+    pippo();
+    
+ // Dropdown per selezione pagina
+    const dropdownButton = document.getElementById("dropDownPage");
+    dropdownButton.addEventListener("click", function() {
+        const paginaSelezionata = dropdownButton.value;
+
+        if (paginaSelezionata >= 1) {
+            changePage(paginaSelezionata - 1);
+        }
+    });
+    
+    //dropdown per il sort
+    
+   const dropdownButtonSort = document.getElementById("dropDownSort");
+    dropdownButtonSort.addEventListener("click", function() {
+        const sort = dropdownButtonSort.value;
+		console.log("metodo sort "+ sort);
+        if (sort== "ASC"|| sort=="DESC") {
+
+	        sortDirection = sort; 
+	        console.log("sortDirection "+ sortDirection);
+	        changePage(current_page);
+            
+        }
+  });
+    
+        
+};
+
+
+
+// questa funzione
+//richiama changePage(0) per caricare la prima pagina
+function pippo() {
+    changePage(0);
+    numeroPagine();
+}
+</script>
+
+	<script>
+//Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal ("X")
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+  modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+
+
+
+
+</script>
+
+<!-- script per inviare i dati passati inserimento libro -->
+    <script >
+    document.addEventListener("DOMContentLoaded", () => {
+        const formEl = document.querySelector('#inserimentoLibroForm'); //seleziono il form->modale
+
+        formEl.addEventListener('submit', event => {  //intercetto evento con bottone
+            event.preventDefault();
+			
+			const formData = new FormData(formEl); //crea un oggetto coppie chiave/valore dei campi del form.
+			const data = Object.fromEntries(formData);//converte FormData in un oggetto JavaScrip
+			console.log(data); // debug!
+			
+			//creazione oggetto da inviare al back
+			const datiLibro = {
+					 "libroRequest":{
+			                "titolo": data.titolo,
+			                "annoPubblic":parseInt(data.anno, 10),
+			                "edizione": data.edizione,
+			                "lingua": data.lingua,
+			                "idCasaEditrice": data.casaEditrice
+			                     },
+
+			        "autoreRequest":{
+			                     "nome": data.nome,
+			                     "cognome": data.cognome
+			                        }
+				};			
+			fetch('/createnewlibroconautore', {
+		        method: 'POST',
+		        
+		        headers: {
+		            "Content-Type": "application/json"
+		        },
+		        body: JSON.stringify(datiLibro)
+			  })
+		        .then(response => {
+
+		        	
+    	    if (response.ok) {
+      	      console.log("libro inserito");
+      	      return response.json();
+     	   } else {
+      	      console.log("not ok");
+     	       throw new Error(response.status);
+    	    }
+  	  })
+   		 .then(data => {
+     	   console.log("Risposta Back End invio dati libro:", data);
+     	  pippo(); // aggiorno la tabella
+     	 const modal = document.getElementById("myModal");
+     	 modal.style.display = "none";
+        
+		    })
+		    
+		    
+			});
+		});
+    
+    </script>
+    
+  
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+		crossorigin="anonymous">
+	</script>
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+	<!-- bottone prima -->
+
+	<div class="itemContainer" id="itemContainer"></div>
+	<div class="pagination">
+		<button id="previusButton">Previous</button>
+
+		<!-- Dropdown per paginazione -->
+		<form action="#">
+			<label for="dropDownPage">choose page</label> <select
+				name="numeroPagine" id="dropDownPage">
+
+			</select>
+		</form>
+
+
+		<!-- bottone next -->
+		<button id="nextButton">Next</button>
+
+	</div>
+</body>
+</html>
