@@ -14,14 +14,14 @@ public class AutoreRequest {
 	@Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "formato data non valido, required: 'yyyy-MM-dd'")
 	private String dataDiNascita;
 	
-	@NotEmpty
+
 	private String nazionalita;
 	
-	@NotEmpty
+
 	private String pseudonimo;
 
 	public AutoreRequest(@NotEmpty String nome, @NotEmpty String cognome, String dataDiNascita,
-			@NotEmpty String nazionalita, @NotEmpty String pseudonimo) {
+			String nazionalita, String pseudonimo) {
 		super();
 		this.nome = nome;
 		this.cognome = cognome;

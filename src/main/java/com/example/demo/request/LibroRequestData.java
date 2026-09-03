@@ -1,8 +1,12 @@
 package com.example.demo.request;
 
+import jakarta.validation.Valid;
+
 public class LibroRequestData {
-	
-	private LibroRequest libroRequest;	
+
+	@Valid
+	private LibroRequest libroRequest;
+	@Valid
 	private AutoreRequest autoreRequest;
 
 
