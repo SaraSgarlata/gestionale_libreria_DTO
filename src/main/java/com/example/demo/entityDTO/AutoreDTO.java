@@ -5,14 +5,13 @@ import java.util.Set;
 
 
 public record AutoreDTO(
-		
-		
-	    String nomeAutore,
-	    String cognome,
-	    Date dataDiNascita,
-	    String nazionalita,
-	    String pseudonimo,
-	    Set<String> nomiLibri
-	    ) {
+
+        String nomeAutore,
+        String cognome,
+        Date dataDiNascita,
+        String nazionalita,
+        String pseudonimo,
+        Set<String> nomiLibri
+) {
 
 }

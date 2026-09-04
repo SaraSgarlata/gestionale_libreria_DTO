@@ -5,13 +5,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entityDTO.AutoreDTO;
 import com.example.demo.exception.RequestException;
 import com.example.demo.mapper.AutoreMapper;
-import com.example.demo.mapper.AutoreMapperImpl;
 import com.example.demo.model.entity.Autore;
 import com.example.demo.repository.AutoreRepository;
 import com.example.demo.request.AutoreRequest;
@@ -24,6 +26,8 @@ public class AutoreService {
 	
 	@Autowired
 	AutoreRepository autoreRepository;
+
+	private static final Logger log = LoggerFactory.getLogger(AutoreService.class);
 
 	
 	public Set<Autore> trovaOCreaAutorePerJSone(AutoreRequest autoreRequest) {
@@ -39,8 +43,11 @@ public class AutoreService {
 			// salvo e aggiungo autore
 			autoreSalvato = autoreRepository.save(autoreSalvato);
 			autoreList.add(autoreSalvato);
+			log.info("Autore con id {} e nome '{}' creato con successo", autoreSalvato.getIdAutore(), autoreSalvato.getNome());
+
 		} else {
 			// se l'autore esiste già, aggiungiamolo
+			log.info("Autore già esistente trovato, riutilizzo il record esistente");
 			autoreList.add(listaAutoreEsistente.stream().findFirst().get()); // Prende il primo autore dalla lista
 		}
 		return  autoreList;
@@ -48,8 +55,8 @@ public class AutoreService {
 	
 	public List<AutoreDTO> findAllAutore ()throws RequestException{
 		List<Autore> listaAutori = autoreRepository.findAll();
-		if (listaAutori.isEmpty()|| listaAutori==null) {
-			throw new RequestException("Libri non trovati", "404");
+		if (listaAutori == null || listaAutori.isEmpty()) {
+			throw new RequestException("Autori non trovati", HttpStatus.NOT_FOUND);
 		}
 		
 		List<AutoreDTO> listaAutoriDto = new ArrayList<AutoreDTO>();

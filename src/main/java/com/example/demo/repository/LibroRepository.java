@@ -13,10 +13,7 @@ import com.example.demo.model.entity.Libro;
 public interface LibroRepository extends  JpaRepository<Libro, Integer> {
 
 	Page<Libro> findAll(Pageable pageable);
-	
-	
-	//Page<Libro> findPaginated(int pageNo, int pageSize);
-	 //Page<Libro> findByTitoloContaining(String keyword, Pageable pageable);
+
 	
 
 

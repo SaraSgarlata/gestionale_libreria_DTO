@@ -1,29 +1,19 @@
 package com.example.demo.exception;
 
-public class RequestException extends RuntimeException{
-	
-	
-	private final String message;
-	private final String httpStatus;
-	
-	
-	
-	 public RequestException(String message, String httpStatus) {
-	        super(); 
-	        this.message = message; 
-	        this.httpStatus = httpStatus;
-	    }
+import org.springframework.http.HttpStatus;
 
+public class RequestException extends RuntimeException {
 
+    //è semplicemente una classe che rappresenta un tipo di errore
+    private final HttpStatus httpStatus;
 
-	public String getMessage() {
-		return message;
-	}
+    public RequestException(String message, HttpStatus httpStatus) {
+        super(message);
+        this.httpStatus = httpStatus;
+    }
 
-
-
-	public String getHttpStatus() {
-		return httpStatus;
-	}
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
 
 }
