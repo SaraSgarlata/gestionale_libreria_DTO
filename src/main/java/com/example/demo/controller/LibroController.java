@@ -40,10 +40,12 @@ public class LibroController {
 	}
 
 
+	// filtro opzionale: se assente restituisce tutti i libri, altrimenti applica
+	// la ricerca lato database (titolo, anno, autori). Il match avviene nella query SQL.
 	@GetMapping("/findalllibro")
 	@ResponseBody
-	public ResponseEntity<List<LibroDTO>> listaDeiLibri() {
-		return ResponseEntity.ok(libroService.findAllListaLibriConAutore()); // Restituisce 200 ok e la lista di libri
+	public ResponseEntity<List<LibroDTO>> listaDeiLibri(@RequestParam(required = false) String filtro) {
+		return ResponseEntity.ok(libroService.cercaLibri(filtro)); // Restituisce 200 ok e la lista di libri (eventualmente vuota)
 	}
 
 	@GetMapping("/findlibrobyid/{id}")
@@ -52,6 +54,8 @@ public class LibroController {
 		LibroDTO libroTrovato = libroService.findLibroById(id);
 		return ResponseEntity.ok(libroTrovato);
 	}
+
+
 
 	@PostMapping("/createnewlibro")
 	@ResponseBody

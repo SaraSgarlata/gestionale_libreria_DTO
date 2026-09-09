@@ -64,6 +64,26 @@ public class LibroService {
 		return listaDto;
 	}
 
+	// Lista filtrata lato database: se il filtro è vuoto restituisce tutti i libri,
+	// altrimenti delega la selezione alla query del repository.
+	// A differenza di findAllListaLibriConAutore NON lancia 404 quando il risultato
+	// è vuoto: un filtro senza corrispondenze è una risposta 200 con lista vuota.
+	public List<LibroDTO> cercaLibri(String filtro) {
+		List<Libro> listaLibri;
+		if (filtro == null || filtro.isBlank()) {
+			listaLibri = libroRepository.findAll();
+		} else {
+			listaLibri = libroRepository.cercaPerFiltro(filtro.trim());
+		}
+
+		List<LibroDTO> listaDto = new ArrayList<>();
+		for (Libro libro : listaLibri) {
+			listaDto.add(libroMapper.libroToLibroDto(libro));
+		}
+		log.info("Ricerca libri con filtro '{}': {} risultati", filtro, listaDto.size());
+		return listaDto;
+	}
+
 	public LibroDTO findLibroById(int id) throws RequestException {
 		Libro libroTrovato;
 
@@ -108,7 +128,10 @@ public class LibroService {
 		Libro libroSalvato = libroRepository.save(libro);
 
 		LibroDTO libroDTO = libroMapper.libroToLibroDto(libroSalvato);
-		log.info("Libro con id {} e titolo '{}' e autore, creato con successo", libroRequest.getTitolo(), autoreRequest.getCognome());
+		log.info("Libro con id {} e titolo '{}' creato con successo, autore: {}",
+				libroSalvato.getIdLibro(),
+				libroSalvato.getTitoloLibro(),
+				autoreRequest.getCognome());
 		return true;
 	}
 
